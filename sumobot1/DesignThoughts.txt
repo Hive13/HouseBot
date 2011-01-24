@@ -1,0 +1,21 @@
+For the loop() this is kinda written in a psuedocode way
+
+if(LftLine = false && RhtLine = false)        // If we are not hitting any lines
+  if(LftDist != true && RtDist != true)       //  If we do not see anyone...
+    StartRightTurn()                          //    Start rotating.
+  else if(LftDist = true  && RtDist = false)  //  If We see something on the left.
+    turnLeft()                                //    Start turning left.
+  else if(LftDist = false && RtDist = true)   //  If We see something on the right.
+    turnRight()                               //    Start turning right.
+  else if(LftDist = true  && RtDist = true)   //  If We see something in front of us.
+    forward() // Charge!                      //    Start going forward
+  end if                                      //  end If
+else if (LftLine = true  && RhtLine = false)  // If we see a line on the left
+  turnRight(90)                               //  Turn right 90º
+else if (LftLine = false && RhtLine = true)   // If we see a line on the right
+  turnLeft(90)                                //  Turn left 90º
+else if (LftLine = true && RhtLine = true)    // If we see a line dead in front
+  backUp(20)                                  //  Back up 20 mm
+  turnRight(180)                              //  Turn right 180º
+end if                                        // end If
+  

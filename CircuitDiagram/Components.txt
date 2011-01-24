@@ -1,0 +1,34 @@
+----------------------------------
+List of Electrical Components
+----------------------------------
+1. Arduino - Diavolino
+1.1. AA Battery Pack
+2. Adafruit Motorshield
+2.1. 2x Gearmotors
+2.2. Li-Poly Battery Pack
+2.3. 5v Voltage Regulator (? Dunno if we need)
+3. 2x Sonar Sensors (Distance Sensors)
+4. 2x Ground Reflectance Sensors (Line sensors)
+
+----------------------------------
+Occupied Arduino Pins
+----------------------------------
+1. Arduino
+1.1. Used Pins:
+  - D4, D5, D6, D7, D8, D12 (Motorshield)
+  - D14, D15 (Sonar)
+  - D16, D17 (Line Sensors)
+1.2. Not-Used (Yet):
+  - D2, D3, D9, D10, D11, D13
+  - (A4, A5|D18, D19)
+2. MotorShield
+2.1. Used Pins:
+  - D5: Motor #3
+  - D6: Motor #4
+  - D4, D7, D8, D12: DC Motors
+3. 2x Sonar Sensors
+3.1. Used Pins:
+  - D14, D15
+4. 2x Ground Reflectance Sensors
+4.1. Used Pins:
+  - D16, D17
