@@ -1,7 +1,7 @@
 ----------------------------------
 List of Electrical Components
 ----------------------------------
-1. Arduino - Diavolino
+1. Diavolino -> compatible Arduino - Duemilanove
 1.1. AA Battery Pack
 2. Adafruit Motorshield
 2.1. 2x Gearmotors
