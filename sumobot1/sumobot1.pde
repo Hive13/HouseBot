@@ -1,3 +1,5 @@
+
+
 /*
  * Hive13 Sumobot AI Code
  *
@@ -72,7 +74,7 @@ AF_DCMotor mtrLeft(LEFT_MOTOR);
 AF_DCMotor mtrRight(RIGHT_MOTOR);
 
 // If debuging is on output to serial
-int debug = 0;
+int debug = 1;
 // Where was target last seen
 int targetDirection = UNK;
 // Current Direction State
@@ -83,6 +85,11 @@ int stateRight = 0;
 int stateLeft  = 0;
 int stateBack  = 0;
 
+//Sonar setup
+int LeftSonarPin = 14;
+int RightSonarPin = 15;
+int sonarrange = 500; // max range to look for enemy
+
 void setup() {
   // put your setup code here, to run once:
   // sleep 3 seconds
@@ -92,8 +99,8 @@ void setup() {
   }
   // NOTE: The motorshield doesn't use the analog pins (or digital pins 14-19) or pins 2 and 13.
   // We will use the digital version of the analog pins
-  view.setLeftSonarPin(14);
-  view.setRightSonarPin(15);
+//  view.setLeftSonarPin(14); Not needed changed library sonic sensor argument
+//  view.setRightSonarPin(15); idem
   gs.setLeftQTIPin(16);
   gs.setRightQTIPin(17); 
   gs.calibrate();  // Autodetect darkness since we start on black.
@@ -121,8 +128,8 @@ void setup() {
 // Returns true if one was seen.
 // Sets targetDirection as well
 int look() {
-  int leftEye = view.pulseLeftSonar();
-  int rightEye = view.pulseRightSonar();
+  int leftEye = view.pulseSonar(LeftSonarPin,sonarrange);
+  int rightEye = view.pulseSonar(RightSonarPin,sonarrange);
   
   if(debug) {
     Serial.print("Left Eye = ");
@@ -143,28 +150,31 @@ int look() {
   // Does either eye see something < 77 cm away?
   if(leftEye < INRANGE || rightEye < INRANGE) {
     // Are the Left && Right eye values within a fuzzy range of each other?
-    if(leftEye > rightEye - TARGETING_RANGE && 
-       leftEye < rightEye + TARGETING_RANGE) {
+    if(abs(leftEye- rightEye) < TARGETING_RANGE  {
       // Yes! Attack!
-      if(debug) {
+      if(debug) 
+      {
         Serial.println("Targeting Acquired, CHARGE!!");
       } 
       //stateBack = 0;
       stateLeft = 0;
       stateRight = 0;
-    } else if(leftEye > rightEye) {
+    } 
+    else if(leftEye > rightEye) {
       // Ok.. So one eye is in range, the other is not at all.
       // If the leftEye is farther out of range, we need to go left.
+      // Greg comment: you need to go right not left 
       if(rightEye) {
         if(debug) {
-          Serial.println("Go Left");
+          Serial.println("Go Left"); // go right?
         } 
         targetDirection = LEFT;
         stateLeft = 0;
         stateRight += 4;
         //stateBack = 0;
-      } else { // For some reason we don't have visual on rightEye
-        Serial.println("Left eye only targeting acquire");
+      } 
+      else { // For some reason we don't have visual on rightEye
+        Serial.println("Left eye not > to right eye");
         // TODO: Still need to do fancyness here!
         stateLeft = 0;
         stateRight = 0;
@@ -451,9 +461,12 @@ void loop() {
 //currentDirection = FWD;
     // Souround all motor controls with a check to see if we want to stop
     if(currentDirection != STOP) {
+         Serial.println("start to drive");
        drive(); 
- //      look();
-//       delay(100);
+         Serial.println("end of drive then look");
+       look();
+         Serial.println("end of look");
+       delay(10000);
     }
   /**/
 }
