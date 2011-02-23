@@ -1,6 +1,2 @@
 SonicSensor	KEYWORD1
-pulseSonar	KEYWORD2
-pulseLeftSonar	KEYWORD2
-pulseRightSonar	KEYWORD2
-setRightSonarPin	KEYWORD2
-setLeftSonarPin	KEYWROD2
+pulseSonar

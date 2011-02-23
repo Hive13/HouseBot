@@ -2,30 +2,30 @@
 #include "WProgram.h"
 #include "SonicSensor.h"
 
-#define TIMEOUT 2000
+//#define TIMEOUT 500
 
-SonicSensor::SonicSensor()
-{
-  LeftSonarPin = 14;
-  RightSonarPin = 15;
-}
+//SonicSensor::SonicSensor()
+//{
+//  LeftSonarPin = 14;
+//  RightSonarPin = 15;
+//}
 
-void SonicSensor::setLeftSonarPin(int pin)
-{
-  LeftSonarPin = pin;
-}
+//void SonicSensor::setLeftSonarPin(int pin)
+//{
+//  LeftSonarPin = pin;
+//}
 
-void SonicSensor::setRightSonarPin(int pin)
-{
-  RightSonarPin = pin;
-}
+//void SonicSensor::setRightSonarPin(int pin)
+//{
+//  RightSonarPin = pin;
+//}
 
 // Sends a pulse out of an ultra sonic sensor
 // The sensors work by sending a Low-High-Low pulse and measuring the time
 //   that it takes to see that bounce back.  The greater the width of the HIGH
 //   wave the farther something is.
 // Return the timecount of the return pulse
-int SonicSensor::pulseSonar(int pin)
+int SonicSensor::pulseSonar(int pin, int timeout)
 {
   int val;
   int timecount = 0;
@@ -45,7 +45,7 @@ int SonicSensor::pulseSonar(int pin)
   while(val == LOW && !fail) { // Loop until val == HIGH
     val = digitalRead(pin);
     timecount += 1;
-    if(timecount > TIMEOUT)
+    if(timecount > timeout)
 	fail = true;
   }
   if(fail)
@@ -55,7 +55,7 @@ int SonicSensor::pulseSonar(int pin)
   while(val == HIGH && !fail) { // Counts high pulse time
     val = digitalRead(pin);
     timecount += 1;
-    if(timecount > TIMEOUT)
+    if(timecount > timeout)
 	fail = true;
   }
   if(fail)
@@ -63,12 +63,12 @@ int SonicSensor::pulseSonar(int pin)
   return timecount;
 }
 
-int SonicSensor::pulseLeftSonar()
-{
-  return pulseSonar(LeftSonarPin);
-}
+//int SonicSensor::pulseLeftSonar()
+//{
+//  return pulseSonar(LeftSonarPin);
+//}
 
-int SonicSensor::pulseRightSonar()
-{
-  return pulseSonar(RightSonarPin);
-}
+//int SonicSensor::pulseRightSonar()
+//{
+//  return pulseSonar(RightSonarPin);
+//}
