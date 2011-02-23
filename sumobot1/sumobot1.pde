@@ -150,7 +150,7 @@ int look() {
   // Does either eye see something < 77 cm away?
   if(leftEye < INRANGE || rightEye < INRANGE) {
     // Are the Left && Right eye values within a fuzzy range of each other?
-    if(abs(leftEye- rightEye) < TARGETING_RANGE  {
+    if(abs(leftEye- rightEye) < TARGETING_RANGE)  {
       // Yes! Attack!
       if(debug) 
       {
@@ -461,12 +461,15 @@ void loop() {
 //currentDirection = FWD;
     // Souround all motor controls with a check to see if we want to stop
     if(currentDirection != STOP) {
-         Serial.println("start to drive");
+          if(debug) {
+         Serial.println("start to drive");}
        drive(); 
-         Serial.println("end of drive then look");
+         if(debug) {
+         Serial.println("end of drive then look");}
        look();
+         if(debug) {
          Serial.println("end of look");
-       delay(10000);
+       delay(10000);}
     }
   /**/
 }

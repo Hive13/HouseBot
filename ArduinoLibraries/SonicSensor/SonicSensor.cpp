@@ -28,7 +28,7 @@
 int SonicSensor::pulseSonar(int pin, int timeout)
 {
   int val;
-  int timecount = 0;
+//  int timecount = 0;
   bool fail = false;
   
   /* Send a Low-High-Low pulse to activiate trigger sensor */
@@ -41,12 +41,12 @@ int SonicSensor::pulseSonar(int pin, int timeout)
   
   /* Listen for echo pulse */
   pinMode(pin, INPUT);
-  val = digitalRead(pin);
-  while(val == LOW && !fail) { // Loop until val == HIGH
-    val = digitalRead(pin);
-    timecount += 1;
-    if(timecount > timeout)
-	fail = true;
+  val = pulseIn(pin, HIGH, timeout);
+  /*while(val == LOW && !fail) { // Loop until val == HIGH
+  //  val = digitalRead(pin);
+  //  timecount += 1;
+  //  if(timecount > timeout)
+  	fail = true;
   }
   if(fail)
 	return 0;
@@ -59,8 +59,8 @@ int SonicSensor::pulseSonar(int pin, int timeout)
 	fail = true;
   }
   if(fail)
-	return 0;
-  return timecount;
+	return 0;*/
+  return val;
 }
 
 //int SonicSensor::pulseLeftSonar()
