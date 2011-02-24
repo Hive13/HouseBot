@@ -88,7 +88,7 @@ int stateBack  = 0;
 //Sonar setup
 int LeftSonarPin = 14;
 int RightSonarPin = 15;
-int sonarrange = 500; // max range to look for enemy
+int sonarrange = 3000; // max range to look for enemy
 
 void setup() {
   // put your setup code here, to run once:
@@ -129,6 +129,7 @@ void setup() {
 // Sets targetDirection as well
 int look() {
   int leftEye = view.pulseSonar(LeftSonarPin,sonarrange);
+  delay(1);
   int rightEye = view.pulseSonar(RightSonarPin,sonarrange);
   
   if(debug) {
