@@ -129,7 +129,8 @@ void setup() {
 // Sets targetDirection as well
 int look() {
   int leftEye = view.pulseSonar(LeftSonarPin,sonarrange);
-  delay(1);
+  delay(3);// to avoid any echo between left and right sonar need delay between trigger, sound travels 340 m/s, mex range for sensor 3.3m
+  // approx 1ms to go + 1 ms to bounce back, add 1 ms for safety
   int rightEye = view.pulseSonar(RightSonarPin,sonarrange);
   
   if(debug) {
@@ -165,7 +166,7 @@ int look() {
       // Ok.. So one eye is in range, the other is not at all.
       // If the leftEye is farther out of range, we need to go left.
       // Greg comment: you need to go right not left 
-      if(rightEye) {
+      if(rightEye) { // What is the purpose of this test check that right eye is not = 0? to check
         if(debug) {
           Serial.println("Go Left"); // go right?
         } 
@@ -174,7 +175,7 @@ int look() {
         stateRight += 4;
         //stateBack = 0;
       } 
-      else { // For some reason we don't have visual on rightEye
+      else { // For some reason we don't have visual on rightEye, meaning righteye = 0,  meaning left eye negative
         Serial.println("Left eye not > to right eye");
         // TODO: Still need to do fancyness here!
         stateLeft = 0;
@@ -183,7 +184,7 @@ int look() {
       }
     } else if(rightEye > leftEye) {
       // Ok.. So one eye is in range, the other is not at all.
-      // If the right eye is farther out of range, we need to go right.
+      // If the right eye is farther out of range, we need to go right. // again you need to go left
       if(leftEye) {
         if(debug) {
           Serial.println("Go Right");
@@ -268,25 +269,25 @@ void drive() {
      debugEdge(edge);
      
   if (stateBack) {
-      stateBack--;
-      if(currentDirection != BWD) {
+      stateBack--;// decrease state back until = 0
+      if(currentDirection != BWD) { // if not already driving backward then drive backward
         driveBackward();
       }
-    } else {
-      if(!stateLeft && !stateRight) {
-        if(currentDirection != FWD)
+    } else {// stateback is not equal to 0
+      if(!stateLeft && !stateRight) { // if state left or state right are different from 0 then drive forward
+        if(currentDirection != FWD) // if not already driving FWD then drive fwd
           driveForward();
       } // else we are already going forward
     }
     if(!stateBack) {
        if(stateLeft) {
-        stateLeft--;
-        if(currentDirection != LEFT) {
+        stateLeft--; // decrease state left until = 0
+        if(currentDirection != LEFT) {// if not already driving left then drive left
           rotateLeft();
         }
       } else if (stateRight) {
-        stateRight--;
-        if(currentDirection != RIGHT) {
+        stateRight--;// decrease state fight until = 0
+        if(currentDirection != RIGHT) { // if not already driving right then drive right
           rotateRight();
         }
       } 
@@ -318,19 +319,19 @@ void drive() {
         break;
       }
     }
-  } else if (QTI_RIGHT == edge) {
+  } else if (QTI_RIGHT == edge) {// if edge dectected on the right side then 
     // Turn 90 deg right
     targetDirection = RIGHT; // look() will handle turning from here.
     stateRight = 140;
     stateBack = 2;
     
-  } else if (QTI_LEFT == edge) {
+  } else if (QTI_LEFT == edge) {// if edge detected on the left side then
     // turn 90 deg left
     targetDirection = LEFT; // look() will handle turning from here.
     stateLeft = 140;
     stateBack = 2;
     
-  } else if (QTI_BOTH == edge) {
+  } else if (QTI_BOTH == edge) {// if edge is detected on both side
     // backup for a bit
     if(currentDirection != BWD)
       driveBackward();
@@ -456,6 +457,21 @@ void driveBackward() {
   mtrRight.setSpeed(MTR_SPEED + L_OFF);
 }
 
+void debugdrive() { // print alse states + currentdirection and targetdirection
+Serial.print("stateLeft=");
+Serial.print(stateLeft);
+Serial.println();
+Serial.print("stateRight=");
+Serial.print(stateRight);
+Serial.println();
+Serial.print("stateBack=");
+Serial.print(stateBack);
+Serial.println();
+Serial.print("current direction=");
+Serial.print(currentDirection);
+Serial.println();
+}
+
 void loop() {
   // put your main code here, to run repeatedly: 
 // REMOVE ME
@@ -463,13 +479,18 @@ void loop() {
     // Souround all motor controls with a check to see if we want to stop
     if(currentDirection != STOP) {
           if(debug) {
-         Serial.println("start to drive");}
+         Serial.println("start to drive, displaying drive variable");
+         debugdrive();
+       }
        drive(); 
          if(debug) {
-         Serial.println("end of drive then look");}
+         Serial.println("end of drive then look");
+         debugdrive();
+       }
        look();
          if(debug) {
          Serial.println("end of look");
+         debugdrive();
        delay(10000);}
     }
   /**/
