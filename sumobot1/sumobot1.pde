@@ -33,13 +33,13 @@
  */
 
 /* Defines */ 
-// action Modes
+// action Modes not used
 #define IDLE 0
 #define SCANNING 1
 #define LOCKINGON 2
 #define CHARGING 3
 
-// Directions
+// Directions used only used by drive? 
 #define UNK   0
 #define LEFT  1
 #define RIGHT 2
@@ -48,9 +48,9 @@
 #define STOP  5
 
 // In-Range distance
-#define INRANGE 500
+#define INRANGE 3000
 // In-Sight (targeting aquired)
-#define TARGETING_RANGE 50
+#define TARGETING_RANGE 100
 // Left and Right Motors
 #define LEFT_MOTOR 3
 #define RIGHT_MOTOR 4
@@ -75,12 +75,13 @@ AF_DCMotor mtrRight(RIGHT_MOTOR);
 
 // If debuging is on output to serial
 int debug = 1;
-// Where was target last seen
+// Where was target last seen not used
 int targetDirection = UNK;
 // Current Direction State
 int currentDirection = STOP;
 
-// States
+// States counter of iteration the motor will run in one direction
+// can be accessed by qti sensor and sonic sensor
 int stateRight = 0;
 int stateLeft  = 0;
 int stateBack  = 0;
@@ -127,6 +128,7 @@ void setup() {
 // Looks for a target
 // Returns true if one was seen.
 // Sets targetDirection as well
+// if value returned is 0 no target found
 int look() {
   int leftEye = view.pulseSonar(LeftSonarPin,sonarrange);
   delay(3);// to avoid any echo between left and right sonar need delay between trigger, sound travels 340 m/s, mex range for sensor 3.3m
@@ -149,75 +151,83 @@ int look() {
   //       Maybe create a state variable and keep track of what we are currently
   //       doing?
   
-  // Does either eye see something < 77 cm away?
-  if(leftEye < INRANGE || rightEye < INRANGE) {
+  // Does either eye see something < 77 cm away and target any of the eye seing anything
+  if ((leftEye < INRANGE || rightEye < INRANGE) && (leftEye >0 || rightEye>0)) {
     // Are the Left && Right eye values within a fuzzy range of each other?
     if(abs(leftEye- rightEye) < TARGETING_RANGE)  {
       // Yes! Attack!
       if(debug) 
       {
-        Serial.println("Targeting Acquired, CHARGE!!");
+        Serial.println("Targeting Acquired in front, CHARGE!!");
       } 
-      //stateBack = 0;
-      stateLeft = 0;
+      //stateBack = 0; do not override stateback if baking from ring border
+      stateLeft = 0; // no need to move reset stateleft and stateback
       stateRight = 0;
     } 
-    else if(leftEye > rightEye) {
-      // Ok.. So one eye is in range, the other is not at all.
-      // If the leftEye is farther out of range, we need to go left.
-      // Greg comment: you need to go right not left 
-      if(rightEye) { // What is the purpose of this test check that right eye is not = 0? to check
+    else if((leftEye > rightEye) && (leftEye >0 && rightEye>0)){
+      // Ok.. left eye see something farther than right eye, but both see
+      // If the leftEye is farther out of range, we need to go right
         if(debug) {
-          Serial.println("Go Left"); // go right?
+          Serial.println("I saw something on the right but not quiet yet in the center"); // go right?
+        } 
+        targetDirection = RIGHT;
+        stateLeft += 0;
+        stateRight += 4;
+        //stateBack = 0; 
+   } 
+    else if((rightEye > leftEye)  && (leftEye >0 && rightEye>0)){
+      // Ok.. right eye see something farther than left eye, but both see
+      // If the right eye is farther out of range, we need to go right. // again you need to go left
+        if(debug) {
+          Serial.println("I saw something on the left but not quiet yet in the center");
+        }
+        targetDirection = LEFT;
+        stateLeft += 4;
+        stateRight += 0;
+        //stateBack = 0;
+    }
+    else if((leftEye > rightEye) && (leftEye >0 && rightEye==0)){
+      // Ok.. left eye see but not right eye, we need to go left
+        if(debug) {
+          Serial.println("I saw something on the left but nothing with my right eye let's turn left"); // go right?
         } 
         targetDirection = LEFT;
-        stateLeft = 0;
-        stateRight += 4;
-        //stateBack = 0;
-      } 
-      else { // For some reason we don't have visual on rightEye, meaning righteye = 0,  meaning left eye negative
-        Serial.println("Left eye not > to right eye");
-        // TODO: Still need to do fancyness here!
-        stateLeft = 0;
-        stateRight = 0;
-        //stateBack = 0;
-      }
-    } else if(rightEye > leftEye) {
-      // Ok.. So one eye is in range, the other is not at all.
-      // If the right eye is farther out of range, we need to go right. // again you need to go left
-      if(leftEye) {
+        stateLeft += 10;
+        stateRight += 0;
+        //stateBack = 0; 
+   } 
+    else if((rightEye > leftEye)  && (leftEye ==0 && rightEye>0)){
+      // Ok.. right eye see but not left eye, we need to go left
         if(debug) {
-          Serial.println("Go Right");
+          Serial.println("I saw something on the right but nothing with my left eye let's turn right");
         }
         targetDirection = RIGHT;
-        stateRight = 0;
-        stateLeft += 4;
+        stateLeft += 0;
+        stateRight += 10;
         //stateBack = 0;
-      } else { // We are blind in our left eye
-        Serial.println("Right eye blind targeting acquire"); 
-        // TODO: Still need to do fancyness here!
-        stateRight = 0;
-        stateLeft = 0;
-        //stateBack = 0;
-      }
-    }
-  } /*else {
-    // Neither eye has anything in range, so lets start rotating in place.
-    
-    if(RIGHT == targetDirection) {
-      rotateRight();
-    } else {
-      rotateLeft();
     }
     
-  }
-  */
+    
+  } 
+// don't see anything on both eyes, so turn a bit on yourself
+if (rightEye == 0 && leftEye == 0) {
+        if(debug) {
+          Serial.println("No enemy within range let's turn a bit in one direction");
+        }
+        targetDirection = UNK;
+        stateLeft += 0;
+        stateRight += 10;
 }
+
+}
+
 
 // print debugging messages
 void debugEdge(int edge) {
 
    int val = gs.rightQTI();
+   Serial.print("Starting debug function for the edge");
+   Serial.println();
    Serial.print("R");
    Serial.print(val, DEC);
    Serial.println();
