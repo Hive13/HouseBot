@@ -94,7 +94,7 @@ int QTISensor::edgeDetected()
 	
   return QTI_NONE;
 }
-
+// Set threshold valu
 void QTISensor::setRightThreshold(int limit)
 {
   r_threshold = limit;
@@ -105,6 +105,7 @@ void QTISensor::setLeftThreshold(int limit)
   l_threshold = limit;
 }
 
+// Return the threshold value
 int QTISensor::getRightThreshold()
 {
   return r_threshold;
@@ -115,7 +116,7 @@ int QTISensor::getLeftThreshold()
   return l_threshold;
 }
 
-// Take a ground sampling to figure out what is "black"
+// Take a ground sampling to figure out what is "black" and store this value in l_threshold and r_threshold
 void QTISensor::calibrate()
 {
   int lval, rval, firstcal, lastnum_l, lastnum_r;
@@ -128,7 +129,7 @@ void QTISensor::calibrate()
       firstcal = 0;
       lastnum_l = lval;
       rval = rightQTI();
-      lastnum_r = (lastnum_r + rval) / 2;
+      lastnum_r = rval; //ooooops was (lastnum_r + rval) / 2 but was still working !? 
     } else {
       lastnum_l = (lastnum_l + lval) / 2;
       rval = rightQTI();
@@ -140,7 +141,7 @@ void QTISensor::calibrate()
   setRightThreshold(lastnum_r * 0.8);
 }
 
-// Sets the number of sequential hits necessary
+// Sets the number of sequential hits necessary to detect an edge
 void QTISensor::sethistory(int count)
 {
    _history = count;

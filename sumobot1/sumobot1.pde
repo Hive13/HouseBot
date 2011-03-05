@@ -55,13 +55,6 @@
 #define LEFT_MOTOR 3
 #define RIGHT_MOTOR 4
 
-// The standard motor speed used for driving.
-#define MTR_SPEED 255
-#define L_OFF     0
-#define R_OFF     0
-
-// The speed to decrease motor to when turning.
-#define TURN_MTR_SPEED 175
 
 #include <QTISensor.h>
 #include <SonicSensor.h>
@@ -72,6 +65,15 @@ SonicSensor view;  // Front view
 
 AF_DCMotor mtrLeft(LEFT_MOTOR);
 AF_DCMotor mtrRight(RIGHT_MOTOR);
+
+// The standard motor speed used for driving.
+int MTR_SPEED=225;
+int L_OFF=0;
+int R_OFF=0;
+
+// The speed to decrease motor to when turning.
+int TURN_MTR_SPEED=175;
+
 
 // If debuging is on output to serial
 int debug = 1;
@@ -89,7 +91,7 @@ int stateBack  = 0;
 //Sonar setup
 int LeftSonarPin = 14;
 int RightSonarPin = 15;
-int sonarrange = 3000; // max range to look for enemy
+int sonarrange = 2000; // max range to look for enemy
 
 void setup() {
   // put your setup code here, to run once:
@@ -97,11 +99,15 @@ void setup() {
   delay(3000);
   if(debug) {
      Serial.begin(9600);
-  }
+     // The slow motor speed used for testing.
+    MTR_SPEED=100;
+    L_OFF=0;
+    R_OFF=0;
+    // The speed to decrease motor to when turning.
+    TURN_MTR_SPEED=75;  
+}
   // NOTE: The motorshield doesn't use the analog pins (or digital pins 14-19) or pins 2 and 13.
   // We will use the digital version of the analog pins
-//  view.setLeftSonarPin(14); Not needed changed library sonic sensor argument
-//  view.setRightSonarPin(15); idem
   gs.setLeftQTIPin(16);
   gs.setRightQTIPin(17); 
   gs.calibrate();  // Autodetect darkness since we start on black.
@@ -126,9 +132,8 @@ void setup() {
 }
 
 // Looks for a target
-// Returns true if one was seen.
-// Sets targetDirection as well
-// if value returned is 0 no target found
+// Modify state left and state right to modify direction
+// Sets targetDirection as well not used currently
 int look() {
   int leftEye = view.pulseSonar(LeftSonarPin,sonarrange);
   delay(3);// to avoid any echo between left and right sonar need delay between trigger, sound travels 340 m/s, mex range for sensor 3.3m
@@ -136,10 +141,11 @@ int look() {
   int rightEye = view.pulseSonar(RightSonarPin,sonarrange);
   
   if(debug) {
+    Serial.print("#### SONIC SENSOR ####");
+    Serial.println();    
     Serial.print("Left Eye = ");
     Serial.print(leftEye);
-    Serial.println();
-    Serial.print("Right Eye = ");
+    Serial.print("; Right Eye = ");
     Serial.print(rightEye);
     Serial.println();
   }
@@ -171,8 +177,8 @@ int look() {
           Serial.println("I saw something on the right but not quiet yet in the center"); // go right?
         } 
         targetDirection = RIGHT;
-        stateLeft += 0;
-        stateRight += 4;
+        stateLeft = 0;
+        stateRight += 1;
         //stateBack = 0; 
    } 
     else if((rightEye > leftEye)  && (leftEye >0 && rightEye>0)){
@@ -182,8 +188,8 @@ int look() {
           Serial.println("I saw something on the left but not quiet yet in the center");
         }
         targetDirection = LEFT;
-        stateLeft += 4;
-        stateRight += 0;
+        stateLeft += 1;
+        stateRight = 0;
         //stateBack = 0;
     }
     else if((leftEye > rightEye) && (leftEye >0 && rightEye==0)){
@@ -192,8 +198,8 @@ int look() {
           Serial.println("I saw something on the left but nothing with my right eye let's turn left"); // go right?
         } 
         targetDirection = LEFT;
-        stateLeft += 10;
-        stateRight += 0;
+        stateLeft += 2;
+        stateRight = 0;
         //stateBack = 0; 
    } 
     else if((rightEye > leftEye)  && (leftEye ==0 && rightEye>0)){
@@ -202,8 +208,8 @@ int look() {
           Serial.println("I saw something on the right but nothing with my left eye let's turn right");
         }
         targetDirection = RIGHT;
-        stateLeft += 0;
-        stateRight += 10;
+        stateLeft = 0;
+        stateRight += 2;
         //stateBack = 0;
     }
     
@@ -214,9 +220,11 @@ if (rightEye == 0 && leftEye == 0) {
         if(debug) {
           Serial.println("No enemy within range let's turn a bit in one direction");
         }
+        // only modify direction if we didn't have any previous order before
+        if (stateLeft==0 && stateRight==0) {
         targetDirection = UNK;
         stateLeft += 0;
-        stateRight += 10;
+        stateRight += 0;}
 }
 
 }
@@ -225,26 +233,25 @@ if (rightEye == 0 && leftEye == 0) {
 // print debugging messages
 void debugEdge(int edge) {
 
-   int val = gs.rightQTI();
-   Serial.print("Starting debug function for the edge");
+   Serial.print("#### DEBUG EDGE ####");
    Serial.println();
-   Serial.print("R");
-   Serial.print(val, DEC);
-   Serial.println();
-   Serial.print("L");
+   Serial.print("Left QTI : ");
    Serial.print(gs.leftQTI());
+   Serial.print(" Right QTI : ");
+   Serial.print(gs.rightQTI());
+   Serial.println();
+   Serial.print("_Left threshold : ");
+   Serial.print(gs.getLeftThreshold(), DEC);
+   Serial.print(" _Right threshold : ");
+   Serial.print(gs.getRightThreshold(), DEC);
    Serial.println();
    if(edge > 0) {
-    Serial.print("_L_");
-    Serial.print(gs.getLeftThreshold(), DEC);
-    Serial.print(" _R_");
-    Serial.print(gs.getRightThreshold(), DEC);
     if(edge == QTI_LEFT)
-      Serial.print("!L!");
+      Serial.print("!Left Edge!");
     else if(edge == QTI_RIGHT)
-      Serial.print("!R!");
+      Serial.print("!Right Edge!");
     else if(edge == QTI_BOTH)
-      Serial.print("!B!");
+      Serial.print("!Both Edge!");
     Serial.println();
     Serial.println("EDGE DETECTED"); 
    }
@@ -293,12 +300,12 @@ void drive() {
        if(stateLeft) {
         stateLeft--; // decrease state left until = 0
         if(currentDirection != LEFT) {// if not already driving left then drive left
-          rotateLeft();
+          turnLeft();
         }
       } else if (stateRight) {
         stateRight--;// decrease state fight until = 0
         if(currentDirection != RIGHT) { // if not already driving right then drive right
-          rotateRight();
+          turnRight();
         }
       } 
     }
@@ -332,14 +339,16 @@ void drive() {
   } else if (QTI_RIGHT == edge) {// if edge dectected on the right side then 
     // Turn 90 deg right
     targetDirection = RIGHT; // look() will handle turning from here.
-    stateRight = 140;
     stateBack = 2;
+    if (stateRight ==0)
+    stateRight+=1;
     
   } else if (QTI_LEFT == edge) {// if edge detected on the left side then
     // turn 90 deg left
     targetDirection = LEFT; // look() will handle turning from here.
-    stateLeft = 140;
     stateBack = 2;
+    if (stateLeft ==0)
+    stateLeft+=1;
     
   } else if (QTI_BOTH == edge) {// if edge is detected on both side
     // backup for a bit
@@ -348,8 +357,9 @@ void drive() {
     // turn 180 degrees
     stateBack = 10;
     // delay here?
-    stateRight = 40;
-    stateLeft = 0;
+    if (stateRight ==0)
+    stateRight+=3;
+    //stateLeft = 0;
   } else if (QTI_EDGE_BOTH == edge) { // We done fell off (or are close)
     stopMotors();
   }
@@ -468,16 +478,15 @@ void driveBackward() {
 }
 
 void debugdrive() { // print alse states + currentdirection and targetdirection
+Serial.print("#### STATES & DIRECTION ####");
+Serial.println();
 Serial.print("stateLeft=");
 Serial.print(stateLeft);
-Serial.println();
-Serial.print("stateRight=");
+Serial.print("; stateRight=");
 Serial.print(stateRight);
-Serial.println();
-Serial.print("stateBack=");
+Serial.print("; stateBack=");
 Serial.print(stateBack);
-Serial.println();
-Serial.print("current direction=");
+Serial.print("; current direction=");
 Serial.print(currentDirection);
 Serial.println();
 }
@@ -501,7 +510,7 @@ void loop() {
          if(debug) {
          Serial.println("end of look");
          debugdrive();
-       delay(10000);}
+       delay(1);}
     }
   /**/
 }
