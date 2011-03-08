@@ -23,8 +23,8 @@ int QTISensor::pulseQTI(int pin)
   digitalWrite(pin, HIGH);  // Discharges capacitor
   delay(1);
   pinMode(pin, INPUT);
-  //digitalWrite(pin, LOW);
-  while(digitalRead(pin) && !fail) { // Wait for pin to go low
+  digitalWrite(pin, LOW); // turn pullups off - or it won't work  
+   while(digitalRead(pin) && !fail) { // Wait for pin to go low
     timecount++;
     if(timecount > TIMEOUT)
     fail = true;
