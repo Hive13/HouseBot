@@ -91,7 +91,7 @@ int stateBack  = 0;
 //Sonar setup
 int LeftSonarPin = 14;
 int RightSonarPin = 15;
-int sonarrange = 2000; // max range to look for enemy
+int sonarrange = 500; // max range to look for enemy
 
 void setup() {
   // put your setup code here, to run once:
@@ -174,7 +174,7 @@ int look() {
       // Ok.. left eye see something farther than right eye, but both see
       // If the leftEye is farther out of range, we need to go right
         if(debug) {
-          Serial.println("I saw something on the right but not quiet yet in the center"); // go right?
+          Serial.println("I saw something on the right but not quiet yet in the center"); // go right
         } 
         targetDirection = RIGHT;
         stateLeft = 0;
@@ -183,7 +183,7 @@ int look() {
    } 
     else if((rightEye > leftEye)  && (leftEye >0 && rightEye>0)){
       // Ok.. right eye see something farther than left eye, but both see
-      // If the right eye is farther out of range, we need to go right. // again you need to go left
+      // If the right eye is farther out of range, we need to go left
         if(debug) {
           Serial.println("I saw something on the left but not quiet yet in the center");
         }
@@ -280,7 +280,7 @@ void debugEdge(int edge) {
 // Generic edge detection and driving loop
 void drive() {
   int edge = QTI_NONE;
-  edge = gs.edgeDetected();
+  edge = gs.edgeDetected();// Edge detected has probably a bug returning left edge when it's both edge....
 
   if(debug)
      debugEdge(edge);
@@ -290,24 +290,31 @@ void drive() {
       if(currentDirection != BWD) { // if not already driving backward then drive backward
         driveBackward();
       }
-    } else {// stateback is not equal to 0
-      if(!stateLeft && !stateRight) { // if state left or state right are different from 0 then drive forward
+    } 
+    else {// stateback is not equal to 0
+      if(!stateLeft && !stateRight) { // if state left and state right are = 0 then drive forward
         if(currentDirection != FWD) // if not already driving FWD then drive fwd
-          driveForward();
-      } // else we are already going forward
-    }
-    if(!stateBack) {
-       if(stateLeft) {
+          driveForward();} 
+       else if(stateLeft<3 && stateLeft>0) {
         stateLeft--; // decrease state left until = 0
         if(currentDirection != LEFT) {// if not already driving left then drive left
-          turnLeft();
-        }
-      } else if (stateRight) {
+          turnLeft();}
+       }    
+        else if(stateLeft>=3) {
+        stateLeft=stateLeft-3; // decrease state left until = 0
+        if(currentDirection != LEFT) {// if not already driving left then drive left
+          rotateLeft();}
+       }
+        else if (stateRight<3 && stateRight>0) {
         stateRight--;// decrease state fight until = 0
         if(currentDirection != RIGHT) { // if not already driving right then drive right
-          turnRight();
-        }
-      } 
+          turnRight();}
+      }
+       else if (stateRight>=3) {
+        stateRight=stateRight-3;// decrease state fight until = 0
+        if(currentDirection != RIGHT) { // if not already driving right then drive right
+          rotateRight();}
+      }
     }
 
   /**/
@@ -339,26 +346,26 @@ void drive() {
   } else if (QTI_RIGHT == edge) {// if edge dectected on the right side then 
     // Turn 90 deg right
     targetDirection = RIGHT; // look() will handle turning from here.
-    stateBack = 2;
-    if (stateRight ==0)
-    stateRight+=1;
+    stateBack = 2; // if debug 2 normal speed 40
+    if (stateLeft==0)
+    stateLeft+=4; // if debug 4 normal speed 100
     
   } else if (QTI_LEFT == edge) {// if edge detected on the left side then
     // turn 90 deg left
     targetDirection = LEFT; // look() will handle turning from here.
-    stateBack = 2;
-    if (stateLeft ==0)
-    stateLeft+=1;
+    stateBack = 2; // if debug 2 normal speed 40
+    if (stateRight==0)
+    stateRight+=4; // if debug 4 normal speed 100
     
   } else if (QTI_BOTH == edge) {// if edge is detected on both side
     // backup for a bit
     if(currentDirection != BWD)
       driveBackward();
     // turn 180 degrees
-    stateBack = 10;
+    stateBack = 2; // if debug 2 normal speed 40
     // delay here?
     if (stateRight ==0)
-    stateRight+=3;
+    stateRight+=4; // if debug 4 normal speed 100
     //stateLeft = 0;
   } else if (QTI_EDGE_BOTH == edge) { // We done fell off (or are close)
     stopMotors();
@@ -423,9 +430,9 @@ void turnLeft() {
   currentDirection = LEFT;
   mtrLeft.run(FORWARD);
   mtrRight.run(FORWARD);
-  mtrLeft.setSpeed(MTR_SPEED + L_OFF);
-  mtrRight.setSpeed(TURN_MTR_SPEED + R_OFF);
-  stateRight = 0;
+  mtrLeft.setSpeed(TURN_MTR_SPEED + L_OFF);
+  mtrRight.setSpeed(MTR_SPEED + R_OFF);
+  //stateRight = 0;
 }
 
 // Stop and Rotate the bot right
@@ -451,7 +458,7 @@ void turnRight() {
   mtrRight.run(FORWARD);
   mtrLeft.setSpeed(MTR_SPEED + L_OFF);
   mtrRight.setSpeed(TURN_MTR_SPEED + R_OFF);
-  stateLeft = 0;
+  //stateLeft = 0;
 }
 
 void driveForward() {
@@ -487,8 +494,23 @@ Serial.print(stateRight);
 Serial.print("; stateBack=");
 Serial.print(stateBack);
 Serial.print("; current direction=");
-Serial.print(currentDirection);
-Serial.println();
+switch(currentDirection) {
+        case BWD:
+        Serial.println("Going Backward");
+        break;
+        case FWD:
+        Serial.println("Going Forward");
+        break;
+        case RIGHT:
+        Serial.println("Right");
+        break;
+        case LEFT:
+        Serial.println("Left");
+        break;
+        default:
+        Serial.println("Unkown state");
+        break;}
+        Serial.println();
 }
 
 void loop() {
