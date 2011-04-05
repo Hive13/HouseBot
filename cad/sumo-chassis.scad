@@ -22,15 +22,15 @@ frame_w = max_w;
 frame_h = 3;
 frame_d = max_d;
 
-// tire + motor thickness ~30
-wheel_radius = 16;
+// tire + motor thickness ~30 
+wheel_radius = 15.5;
 wheel_thickness = 14;
 motor_w =14;
 motor_h = 58;
-motor_d = 24;
+motor_d = 20;
 lip_w = motor_w;
-lip_h = 5;
-lip_d = motor_d+6;
+lip_h = 18;
+lip_d = 25;
 lip_dist_from_bottom_motor = 40;
 tire_distance = 9;
 
@@ -68,12 +68,12 @@ module baseframe() {
 				cube([frame_w, frame_d -(frame_wheel_d + linesensor_depth)-2, batterypack_h + bpack2_h + micro_h]);
 			  }
 			  // Removes space over motors
-			  translate(v = [2,frame_wheel_d+1,frame_h +bpack2_h]) {
-				cube([motor_w, frame_d -(frame_wheel_d + linesensor_depth-1), batterypack_h + micro_h]);
-			  }
-			  translate(v = [frame_w-motor_w-2,frame_wheel_d+1,frame_h +bpack2_h]) {
-				cube([motor_w, frame_d -(frame_wheel_d + linesensor_depth-1), batterypack_h + micro_h]);
-			  }
+			 // translate(v = [2,frame_wheel_d+1,frame_h +bpack2_h]) {
+			//	cube([motor_w, frame_d -(frame_wheel_d + linesensor_depth-1), batterypack_h + micro_h]);
+			 // }
+			  //translate(v = [frame_w-motor_w-2,frame_wheel_d+1,frame_h +bpack2_h]) {
+			//	cube([motor_w, frame_d -(frame_wheel_d + linesensor_depth-1), batterypack_h + micro_h]);
+			 // }
 			  // Remove area over batterypacks
 			  translate(v = [(frame_w + batterypack_d) / 2, frame_d-batterypack_w, frame_h+bpack2_h+wheel_clearance]) {
 				  rotate([0,0,90]) {
@@ -131,14 +131,14 @@ module baseframe() {
 		}
 		// Remove the wheels
 		// Right Tire
-		translate(v = [max_w-2, 12, -1]) {
-			rotate(a = [250, 180, 0]) {
+		translate(v = [max_w-2, 12,-motor_d+22]) {
+			rotate(a = [270, 180, 0]) {
 				motor();
 			}
 		}
 		// Left Tire
-		translate(v = [2, 4, 22]) {
-			rotate(a = [290, 0, 0]) {
+		translate(v = [2, 12, 22]) {
+			rotate(a = [270, 0, 0]) {
 				motor();
 			}
 		}
@@ -167,11 +167,11 @@ module motor() {
      union() {
 	   cube([motor_w, motor_d, motor_h]);
 	  // Lip
-	translate(v = [0, -3, lip_dist_from_bottom_motor]) {
+	translate(v = [0, -(lip_d-motor_d)/2, lip_dist_from_bottom_motor]) {
 		cube([lip_w, lip_d, lip_h]);
           }
 	// wheel
-	translate(v = [wheel_thickness,tire_distance+3,tire_distance]) {
+         translate(v = [motor_w,motor_d/2,motor_d/2]) {
 	    rotate(a = [90, 0, 90]) {
 		cylinder(r = wheel_radius, h = wheel_thickness);
 	    }
