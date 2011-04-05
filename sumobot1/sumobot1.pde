@@ -72,11 +72,11 @@ int L_OFF=0;
 int R_OFF=0;
 
 // The speed to decrease motor to when turning.
-int TURN_MTR_SPEED=175;
+int TURN_MTR_SPEED=75;
 
 
 // If debuging is on output to serial
-int debug = 1;
+int debug = 0;
 // Where was target last seen not used
 int targetDirection = UNK;
 // Current Direction State
@@ -91,7 +91,7 @@ int stateBack  = 0;
 //Sonar setup
 int LeftSonarPin = 14;
 int RightSonarPin = 15;
-int sonarrange = 500; // max range to look for enemy
+int sonarrange = 2000; // max range to look for enemy
 
 void setup() {
   // put your setup code here, to run once:
@@ -100,7 +100,7 @@ void setup() {
   if(debug) {
      Serial.begin(9600);
      // The slow motor speed used for testing.
-    MTR_SPEED=100;
+    MTR_SPEED=120;
     L_OFF=0;
     R_OFF=0;
     // The speed to decrease motor to when turning.
@@ -111,7 +111,7 @@ void setup() {
   gs.setLeftQTIPin(16);
   gs.setRightQTIPin(17); 
   gs.calibrate();  // Autodetect darkness since we start on black.
-  gs.sethistory(2); // Must trigger twice in a row
+  gs.sethistory(2); // Must trigger twice in a row for debug 1 or will fall out
   
   // Make sure both motors start off stopped.
   mtrLeft.run(RELEASE);
@@ -295,23 +295,23 @@ void drive() {
       if(!stateLeft && !stateRight) { // if state left and state right are = 0 then drive forward
         if(currentDirection != FWD) // if not already driving FWD then drive fwd
           driveForward();} 
-       else if(stateLeft<3 && stateLeft>0) {
+       else if(stateLeft<10 && stateLeft>0) {
         stateLeft--; // decrease state left until = 0
         if(currentDirection != LEFT) {// if not already driving left then drive left
           turnLeft();}
        }    
-        else if(stateLeft>=3) {
-        stateLeft=stateLeft-3; // decrease state left until = 0
+        else if(stateLeft>=10) {
+          stateLeft=stateLeft--; // decrease state left until = 0
         if(currentDirection != LEFT) {// if not already driving left then drive left
           rotateLeft();}
        }
-        else if (stateRight<3 && stateRight>0) {
+        else if (stateRight<10 && stateRight>0) {
         stateRight--;// decrease state fight until = 0
         if(currentDirection != RIGHT) { // if not already driving right then drive right
           turnRight();}
       }
-       else if (stateRight>=3) {
-        stateRight=stateRight-3;// decrease state fight until = 0
+       else if (stateRight>=10) {
+        stateRight=stateRight--;// decrease state fight until = 0
         if(currentDirection != RIGHT) { // if not already driving right then drive right
           rotateRight();}
       }
@@ -344,28 +344,28 @@ void drive() {
       }
     }
   } else if (QTI_RIGHT == edge) {// if edge dectected on the right side then 
-    // Turn 90 deg right
-    targetDirection = RIGHT; // look() will handle turning from here.
-    stateBack = 2; // if debug 2 normal speed 40
+    // Turn 90 deg left
+    targetDirection = LEFT; // look() will handle turning from here.
+    stateBack = 75; // if debug 2 normal speed 75
     if (stateLeft==0)
-    stateLeft+=4; // if debug 4 normal speed 100
+    stateLeft+=150; // if debug 4 normal speed 150
     
   } else if (QTI_LEFT == edge) {// if edge detected on the left side then
-    // turn 90 deg left
-    targetDirection = LEFT; // look() will handle turning from here.
-    stateBack = 2; // if debug 2 normal speed 40
+    // turn 90 deg right
+    targetDirection = RIGHT; // look() will handle turning from here.
+    stateBack = 75; // if debug 2 normal speed 75
     if (stateRight==0)
-    stateRight+=4; // if debug 4 normal speed 100
+    stateRight+=75; // if debug 4 normal speed 75
     
   } else if (QTI_BOTH == edge) {// if edge is detected on both side
     // backup for a bit
     if(currentDirection != BWD)
       driveBackward();
     // turn 180 degrees
-    stateBack = 2; // if debug 2 normal speed 40
+    stateBack = 75; // if debug 2 normal speed 75
     // delay here?
     if (stateRight ==0)
-    stateRight+=4; // if debug 4 normal speed 100
+    stateRight+=150; // if debug 4 normal speed 75
     //stateLeft = 0;
   } else if (QTI_EDGE_BOTH == edge) { // We done fell off (or are close)
     stopMotors();
@@ -417,9 +417,13 @@ void rotateLeft() {
   currentDirection = LEFT;
   mtrLeft.run(BACKWARD);
   mtrRight.run(FORWARD);
-  mtrLeft.setSpeed(MTR_SPEED + L_OFF);
-  mtrRight.setSpeed(MTR_SPEED + R_OFF);
+  mtrLeft.setSpeed(210);//210
+  mtrRight.setSpeed(225);//225
   stateRight = 0;
+  if (debug) {
+  mtrLeft.setSpeed(MTR_SPEED + L_OFF);
+  mtrRight.setSpeed(MTR_SPEED + R_OFF);}
+
 }
 
 // Turn left while moving forward.
@@ -430,9 +434,13 @@ void turnLeft() {
   currentDirection = LEFT;
   mtrLeft.run(FORWARD);
   mtrRight.run(FORWARD);
-  mtrLeft.setSpeed(TURN_MTR_SPEED + L_OFF);
-  mtrRight.setSpeed(MTR_SPEED + R_OFF);
+  mtrLeft.setSpeed(120);//120
+  mtrRight.setSpeed(225);//225
   //stateRight = 0;
+    if (debug) {
+  mtrLeft.setSpeed(TURN_MTR_SPEED + L_OFF);
+  mtrRight.setSpeed(MTR_SPEED + R_OFF);}
+  
 }
 
 // Stop and Rotate the bot right
@@ -443,9 +451,12 @@ void rotateRight() {
   currentDirection = RIGHT;
   mtrLeft.run(FORWARD);
   mtrRight.run(BACKWARD);
-  mtrLeft.setSpeed(MTR_SPEED + L_OFF);
-  mtrRight.setSpeed(MTR_SPEED + R_OFF);
+  mtrLeft.setSpeed(225);//225
+  mtrRight.setSpeed(190);//190
   stateLeft = 0;
+    if (debug) {
+  mtrLeft.setSpeed(MTR_SPEED + L_OFF);
+  mtrRight.setSpeed(MTR_SPEED + R_OFF);}
 }
 
 // Turn right while moving forward.
@@ -456,9 +467,12 @@ void turnRight() {
   currentDirection = RIGHT;
   mtrLeft.run(FORWARD);
   mtrRight.run(FORWARD);
-  mtrLeft.setSpeed(MTR_SPEED + L_OFF);
-  mtrRight.setSpeed(TURN_MTR_SPEED + R_OFF);
+  mtrLeft.setSpeed(255); //255
+  mtrRight.setSpeed(120);//120
   //stateLeft = 0;
+    if (debug) {
+  mtrLeft.setSpeed(MTR_SPEED + L_OFF);
+  mtrRight.setSpeed(TURN_MTR_SPEED + R_OFF);}
 }
 
 void driveForward() {
@@ -468,9 +482,12 @@ void driveForward() {
   currentDirection = FWD;
   mtrLeft.run(FORWARD);
   mtrRight.run(FORWARD);
-  mtrLeft.setSpeed(MTR_SPEED + L_OFF);
-  mtrRight.setSpeed(MTR_SPEED + R_OFF);
+  mtrLeft.setSpeed(255);//255 Max left motor speed
+  mtrRight.setSpeed(130);//130 Right motor stronger decrease speed
   stateBack = 0;
+    if (debug) {
+  mtrLeft.setSpeed(MTR_SPEED + L_OFF);
+  mtrRight.setSpeed(MTR_SPEED + R_OFF);}
 }
 
 void driveBackward() {
@@ -480,8 +497,11 @@ void driveBackward() {
   currentDirection = BWD;
   mtrLeft.run(BACKWARD);
   mtrRight.run(BACKWARD);
+  mtrLeft.setSpeed(255);//255
+  mtrRight.setSpeed(130);//215
+    if (debug) {
   mtrLeft.setSpeed(MTR_SPEED + L_OFF);
-  mtrRight.setSpeed(MTR_SPEED + L_OFF);
+  mtrRight.setSpeed(MTR_SPEED + R_OFF);}
 }
 
 void debugdrive() { // print alse states + currentdirection and targetdirection
