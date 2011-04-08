@@ -184,10 +184,56 @@ module motor() {
   }
 }
 
+module holder (){
+
+translate(v = [0,frame_wheel_d+1,frame_h]) {
+				cube([frame_w, frame_d -(frame_wheel_d + linesensor_depth)-2,batterypack_h + bpack2_h + micro_h]);// replace batterypack_h + bpack2_h + micro_h by motor_d-1+offset_w
+			  }
+}
+
+module lower_holder (){
+
+translate(v = [0,frame_wheel_d+1,frame_h]) {
+				cube([frame_w, frame_d -(frame_wheel_d + linesensor_depth)-2,motor_d-1+offset_w]);// replace batterypack_h + bpack2_h + micro_h by motor_d-1+offset_w
+			  }
+}
 
 
-translate(v =[0,0,6]) {
-	baseframe();
+
+//translate(v =[0,0,6]) {
+difference(){
+	holder();
+	lower_holder();
+				  // Remove area over batterypacks
+			  translate(v = [(frame_w + batterypack_d) / 2, frame_d-batterypack_w, frame_h+bpack2_h+wheel_clearance]) {
+				  rotate([0,0,90]) {
+					batterypack();
+				  }
+			}
+
+			translate(v = [(frame_w + bpack2_d) /2,frame_d-bpack2_w,frame_h]) {
+				  rotate([0,0,90]) {
+					  //bpack2();
+					 cube([bpack2_w, bpack2_d, bpack2_h+wheel_clearance]);
+				  }
+			}
+			 translate(v = [(frame_w - micro_d) / 2, frame_d-batterypack_w, frame_h+bpack2_h+batterypack_h+wheel_clearance]) {
+				   cube([micro_d, batterypack_w, 40]);
+			}
+		// Remove the wheels
+		// Right Tire
+		translate(v = [max_w-2, 7,-motor_d+22+offset_w]) {
+			rotate(a = [270, 180, 0]) {
+				motor();
+			}
+		}
+		// Left Tire
+		translate(v = [2, 7, 22+offset_w]) {
+			rotate(a = [270, 0, 0]) {
+				motor();
+			}
+		}
+
 }
 
 

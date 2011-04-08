@@ -84,9 +84,9 @@ translate(v = [0,frame_wheel_d+1,frame_h+lip_d-10]) {
 cube([frame_w/3, frame_d -(frame_wheel_d + linesensor_depth)-2, 10]);
 }
 translate(v = [0,frame_wheel_d+1,frame_h-5]) {
-cube([frame_w/3, frame_d -(frame_wheel_d + linesensor_depth)-2, lip_d-5]);
+cube([frame_w/3, frame_d -(frame_wheel_d + linesensor_depth)-2, lip_d-1]);
 }
-translate(v = [2, 12, 22]) {
+translate(v = [2, 7, 22]) {
 rotate(a = [270, 0, 0]) {
 motor();
 }

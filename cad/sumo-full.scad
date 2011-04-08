@@ -41,6 +41,15 @@ frame_wheel_d = 36;
 wheel_clearance = 15;
 backwall_thickness = 15;
 
+// TEST WITH THE PLOW//
+/* Hive13 SumoBot Plow */ 
+/* aka Mr. Plow */
+plowwidth = 98;
+plowheight = 37;
+plowdepth = 16;
+sonicwidth = 47;
+sonicdepth = 20; // Used to cut out the back
+
 module baseframe() {
 	difference() {
 		union() {
@@ -185,6 +194,74 @@ module motor() {
 }
 
 
+module sonicsensor() { 
+cube([sonicwidth,sonicdepth,23]);
+translate(v = [15.5,-3,-9]) {
+cube([14,sonicdepth+3,10]);
+}
+translate(v = [10, 1, 10]) {
+rotate(a = [90,0,0]) {
+cylinder(r = 9, h=16);
+}
+}
+translate(v = [35, 1, 10]) {
+rotate(a = [90,0,0]) {
+cylinder(r = 9, h=16);
+}
+}
+// Screw holes
+translate(v = [2,1,2]) {
+rotate(a = [90,0,0]) {
+cylinder(r = 1, h=3);
+}
+}
+translate(v = [43,1,18]) {
+rotate(a = [90,0,0]) {
+cylinder(r = 1, h=3);
+}
+}
+}
+
+module linesensor() {
+cube([36, 12, 10]);
+
+/* Remvoe screw hole 
+translate(v = [14,5,10]) {
+cylinder(r = 1,5, h=2);
+}
+*/
+
+}
+
+module plow() {
+
+//difference() {
+
+cube([plowwidth,plowdepth,plowheight]);
+
+// add lip for line sensor
+// translate(v = [2,plowdepth,10]){
+// cube([12, 8,2]);
+// }
+//translate(v = [plowwidth-14,plowdepth,10]){
+// cube([12, 8,2]);
+//}
+
+/* Remove curve - not working well 
+rotate(a = [0,90,0]) {
+translate(v = [-4, 0, -1]) {
+cylinder(r =4, h=plowwidth+2);
+}
+}
+translate(v = [-1, -6, 4]) {
+cube([plowwidth+2,10,40]);
+}
+}
+*/
+}
+
+
+
 
 translate(v =[0,0,6]) {
 	baseframe();
@@ -194,6 +271,49 @@ translate(v =[0,0,6]) {
 
 
 
+// Main Object Section
+// Lay on front for printing
+translate(v=[frame_w,97,6]) {
+rotate(a = [0,0,180]) {
+difference() {
+plow();
+
+
+//translate(v = [14, 4, 0]) {
+// rotate(a = [0, 0, 90]) {
+// linesensor();
+// }
+//}
+//translate(v = [plowwidth-2, 4, 0]) {
+// rotate(a = [0, 0, 90]) {
+// linesensor();
+// }
+//}
+
+rotate(a = [0,180,0]) {
+translate(v = [-sonicwidth-2, 10, -plowheight+2]) {
+sonicsensor();
+}
+}
+
+
+rotate(a = [0, 180, 0]) {
+translate(v = [-plowwidth+2, 10, -plowheight+2]) {
+sonicsensor();
+}
+}
+
+// Remove un-needed plastic
+translate(v = [0, 4, 0]) {
+cube([plowwidth, 20, 10]);
+}
+translate(v = [2,10,plowheight-25]) {
+cube([plowwidth-4, 20, 23]);
+}
+
+}
+}
+}
 
 
 
@@ -217,16 +337,16 @@ translate(v =[0,0,6]) {
 
 //max base
 //cube([max_w, max_d, 1]);
-/*
+
 // Right Tire
-translate(v = [max_w-2, 12, -1]) {//too close to axis
-	rotate(a = [250, 180, 0]) {
+translate(v = [max_w-2, 7,-motor_d+22+offset_w+6]) {
+	rotate(a = [270, 180, 0]) {
 		motor();
 	}
 }
 // Left Tire
-translate(v = [2, 5, 22]) {
-	rotate(a = [290, 0, 0]) {
+translate(v = [2, 7, 22+offset_w+6]) {
+	rotate(a = [270, 0, 0]) {
 		motor();
 	}
 }
@@ -244,4 +364,3 @@ translate(v = [(frame_w + batterypack_d) / 2, frame_d-batterypack_w, frame_h+6+b
 }
 
 
-*/

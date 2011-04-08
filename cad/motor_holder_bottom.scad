@@ -32,7 +32,7 @@ lip_w = motor_w;
 lip_h = 18;
 lip_d = 25;
 lip_dist_from_bottom_motor = 40;
-tire_distance = 9;
+tire_distance = 10;
 cfr_rad=4;
 
 linesensor_spacing = 18;
@@ -80,10 +80,10 @@ motor();
 
 difference(){
 translate(v = [0,frame_wheel_d+1,frame_h-5]) {
-cube([frame_w/3, frame_d -(frame_wheel_d + linesensor_depth)-2, lip_d-5]);
+cube([frame_w/3, frame_d -(frame_wheel_d + linesensor_depth)-2, lip_d-1]);
 }
 
-translate(v = [2, 12, 22]) {
+translate(v = [2, 7, 22]) {// change coordinate from 12 to 5 to have step from 15 long to 10 long
 rotate(a = [270, 0, 0]) {
 motor();
 }

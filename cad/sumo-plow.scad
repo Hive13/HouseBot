@@ -52,12 +52,12 @@ module plow() {
 	cube([plowwidth,plowdepth,plowheight]);
 
    // add lip for line sensor
-   translate(v = [2,plowdepth,10]){
-	   cube([12, 8,2]);
-   }
-   translate(v = [plowwidth-14,plowdepth,10]){
-	   cube([12, 8,2]);
-   }
+  // translate(v = [2,plowdepth,10]){
+//	   cube([12, 8,2]);
+  // }
+   //translate(v = [plowwidth-14,plowdepth,10]){
+//	   cube([12, 8,2]);
+   //}
 
 /*  Remove curve - not working well 
 	rotate(a = [0,90,0]) {
@@ -80,16 +80,16 @@ difference() {
 	plow();
 
 
-	translate(v = [14, 4, 0]) {
-		rotate(a = [0, 0, 90]) {
-			linesensor();
-		}
-	}
-	translate(v = [plowwidth-2, 4, 0]) {
-		rotate(a = [0, 0, 90]) {
-			linesensor();
-		}
-	}
+	//translate(v = [14, 4, 0]) {
+	//	rotate(a = [0, 0, 90]) {
+	//		linesensor();
+	//	}
+	//}
+	//translate(v = [plowwidth-2, 4, 0]) {
+	//	rotate(a = [0, 0, 90]) {
+	//		linesensor();
+	//	}
+	//}
 
 	rotate(a = [0,180,0]) {
 		translate(v = [-sonicwidth-2, 10, -plowheight+2]) {
@@ -105,8 +105,8 @@ difference() {
 	}
 
 	// Remove un-needed plastic
-	translate(v = [16, 4, 0]) {
-		cube([plowwidth - 32, 20, 10]);
+	translate(v = [0, 4, 0]) {
+		cube([plowwidth, 20, 10]);
 	}
 	translate(v = [2,10,plowheight-25]) {
 		cube([plowwidth-4, 20, 23]);
