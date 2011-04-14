@@ -26,12 +26,12 @@ frame_d = max_d;
 wheel_radius = 15.5;
 wheel_thickness = 14;
 motor_w =14;
-motor_h = 58;
+motor_h = 54;
 motor_d = 20;
 lip_w = motor_w;
 lip_h = 18;
 lip_d = 25;
-lip_dist_from_bottom_motor = 40;
+lip_dist_from_bottom_motor = 36;
 tire_distance = 9;
 offset_w =2;
 
